@@ -94,9 +94,7 @@ class HighResSampleStorageDriver(Driver):
   def serialize(self) -> dict:
     return {
       **super().serialize(),
-      "host": self.io._host,
-      "port": self.io._port,
-      "read_timeout": self._read_timeout,
+      "io": self.io.serialize(),
       "motion_timeout": self._motion_timeout,
       "loading_tray_nest": self.automated_retrieval.loading_tray_nest,
     }
