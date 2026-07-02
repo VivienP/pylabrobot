@@ -274,6 +274,14 @@ class HighResSampleStorageAutomatedRetrievalBackend(AutomatedRetrievalBackend):
       raise ValueError(f"Site '{site.name}' is not a known stacker slot; call set_racks() first.")
     return self._site_locations[site.name]
 
+  @property
+  def default_tray_index(self) -> int:
+    """0-based capability tray index for the configured default nest.
+
+    Mirrors ``_nest_for_tray(None) -> loading_tray_nest`` so the capability's
+    ``None`` bookkeeping lands on the same nest the hardware uses."""
+    return self.loading_tray_nest - 1
+
   def _nest_for_tray(self, tray_index: Optional[int]) -> int:
     """Map a 0-based capability tray index to a 1-based device nest number.
 

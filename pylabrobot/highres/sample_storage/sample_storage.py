@@ -1,7 +1,7 @@
 import warnings
 from typing import List, Optional
 
-from pylabrobot.capabilities.automated_retrieval import AutomatedRetrieval
+from pylabrobot.capabilities.automated_retrieval import RandomAccessRetrieval
 from pylabrobot.capabilities.capability import BackendParams
 from pylabrobot.capabilities.humidity_controlling import HumidityController
 from pylabrobot.capabilities.temperature_controlling import TemperatureController
@@ -25,7 +25,7 @@ class _HighResSampleStorage(Resource, Device):
   devices are thin subclasses. Each rack is a *stacker* (a vertical column of
   plate slots); plates enter and leave through one of the device's *nests*
   (transfer stations), exposed as the loading trays of the
-  :class:`AutomatedRetrieval` capability (:attr:`retrieval`). Storage bookkeeping
+  :class:`RandomAccessRetrieval` capability (:attr:`retrieval`). Storage bookkeeping
   and the fetch/store operations live on the capability; address a particular
   nest with its ``tray_index`` (0-based, defaulting to the first nest).
 
@@ -80,7 +80,7 @@ class _HighResSampleStorage(Resource, Device):
     for rack in self._racks:
       self.assign_child_resource(rack, location=None)
 
-    self.retrieval = AutomatedRetrieval(
+    self.retrieval = RandomAccessRetrieval(
       backend=driver.automated_retrieval, racks=self._racks, loading_trays=self.nests
     )
     self._capabilities = [self.retrieval]
