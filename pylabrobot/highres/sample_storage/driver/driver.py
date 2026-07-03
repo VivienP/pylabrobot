@@ -51,7 +51,7 @@ class HighResSampleStorageDriver(Driver):
     port: int = 1000,
     read_timeout: float = 30.0,
     motion_timeout: float = 240.0,
-    loading_tray_nest: int = 1,
+    default_tray_index: int = 0,
     num_nests: int = 2,
   ):
     """
@@ -62,8 +62,8 @@ class HighResSampleStorageDriver(Driver):
       read_timeout: Timeout (s) for query/status commands.
       motion_timeout: Timeout (s) for long-running motion commands
         (``home``, ``pick``, ``place``, door moves).
-      loading_tray_nest: Which nest the :class:`AutomatedRetrieval` capability
-        uses as its default loading tray (1 or 2).
+      default_tray_index: 0-based tray the :class:`AutomatedRetrieval` capability
+        uses when no ``tray_index`` is given (0 or 1).
     """
     super().__init__()
     self.io = Socket(
@@ -78,7 +78,7 @@ class HighResSampleStorageDriver(Driver):
     self._command_lock = asyncio.Lock()
 
     self.automated_retrieval = HighResSampleStorageAutomatedRetrievalBackend(
-      self, loading_tray_nest=loading_tray_nest, num_nests=num_nests
+      self, default_tray_index=default_tray_index, num_nests=num_nests
     )
     self.temperature = HighResSampleStorageTemperatureControllerBackend(self)
     self.humidity = HighResSampleStorageHumidityControllerBackend(self)
@@ -96,7 +96,7 @@ class HighResSampleStorageDriver(Driver):
       **super().serialize(),
       "io": self.io.serialize(),
       "motion_timeout": self._motion_timeout,
-      "loading_tray_nest": self.automated_retrieval.loading_tray_nest,
+      "default_tray_index": self.automated_retrieval.default_tray_index,
     }
 
   # --- lifecycle ------------------------------------------------------------

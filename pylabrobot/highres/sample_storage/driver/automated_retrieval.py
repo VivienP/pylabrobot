@@ -27,9 +27,9 @@ class HighResSampleStorageAutomatedRetrievalBackend(AutomatedRetrievalBackend):
   three indices directly.
 
   The store has two nests, exposed through the multi-tray
-  :class:`AutomatedRetrieval` capability: its ``tray_index`` argument is a
-  0-based nest index (tray ``i`` -> device nest ``i + 1``), and ``tray_index=None``
-  selects :attr:`loading_tray_nest`.
+  :class:`AutomatedRetrieval` capability: ``tray_index`` is a 0-based tray index,
+  and ``tray_index=None`` selects :attr:`default_tray_index`. The 0-based index is
+  converted to the device's 1-based nest number internally (:meth:`_nest_for_tray`).
 
   All commands are issued through the owning :class:`HighResSampleStorageDriver`.
   """
@@ -37,12 +37,12 @@ class HighResSampleStorageAutomatedRetrievalBackend(AutomatedRetrievalBackend):
   def __init__(
     self,
     driver: "HighResSampleStorageDriver",
-    loading_tray_nest: int = 1,
+    default_tray_index: int = 0,
     num_nests: int = 2,
   ):
     super().__init__()
     self._driver = driver
-    self.loading_tray_nest = loading_tray_nest
+    self._default_tray_index = default_tray_index
     self.num_nests = num_nests
     # Slide (Y) below this is "retracted"; a spatula stuck in a stacker sits at
     # the ~256mm slide-in depth, home is 0. Used by request_is_parked()/recover().
@@ -276,18 +276,15 @@ class HighResSampleStorageAutomatedRetrievalBackend(AutomatedRetrievalBackend):
 
   @property
   def default_tray_index(self) -> int:
-    """0-based capability tray index for the configured default nest.
-
-    Mirrors ``_nest_for_tray(None) -> loading_tray_nest`` so the capability's
-    ``None`` bookkeeping lands on the same nest the hardware uses."""
-    return self.loading_tray_nest - 1
+    """0-based tray index used when ``tray_index`` is ``None`` (see the base backend)."""
+    return self._default_tray_index
 
   def _nest_for_tray(self, tray_index: Optional[int]) -> int:
-    """Map a 0-based capability tray index to a 1-based device nest number.
+    """Map a 0-based capability tray index to the device's 1-based nest number.
 
-    ``None`` selects :attr:`loading_tray_nest` (the configured default nest)."""
+    ``None`` selects :attr:`default_tray_index` (the configured default tray)."""
     if tray_index is None:
-      return self.loading_tray_nest
+      tray_index = self._default_tray_index
     if not 0 <= tray_index < self.num_nests:
       raise ValueError(
         f"sample store has trays 0..{self.num_nests - 1}; got tray_index={tray_index}."

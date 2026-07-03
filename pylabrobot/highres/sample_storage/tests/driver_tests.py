@@ -162,8 +162,10 @@ class HighResSampleStorageBackendTests(unittest.IsolatedAsyncioTestCase):
     with self.assertRaises(ValueError):
       self.retrieval._nest_for_tray(2)
 
-  def test_default_tray_follows_loading_tray_nest(self):
-    driver = HighResSampleStorageDriver(host="10.253.253.253", loading_tray_nest=2)
+  def test_default_tray_index_selects_nest(self):
+    # default_tray_index is 0-based; tray 1 -> device nest 2.
+    driver = HighResSampleStorageDriver(host="10.253.253.253", default_tray_index=1)
+    self.assertEqual(driver.automated_retrieval.default_tray_index, 1)
     self.assertEqual(driver.automated_retrieval._nest_for_tray(None), 2)
 
   async def test_set_humidity_unsupported(self):
